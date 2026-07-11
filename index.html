@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Karlyne Duo - 2ndA CI</title>
+  <style>
+    body { font-family: 'Nunito', Arial; background: #fef9c3; margin: 0; text-align: center; }
+    header { background: #f59e0b; color: white; padding: 20px; }
+   .score { font-size: 24px; font-weight: bold; }
+   .barre { background: #fde68a; height: 12px; border-radius: 10px; margin: 10px 40px; }
+   .progres { background: #22c55e; height: 12px; border-radius: 10px; width: 0%; transition: 0.5s; }
+   .carte { background: white; max-width: 650px; margin: 30px auto; padding: 35px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+   .matiere { color: #d97706; font-weight: bold; font-size: 18px; }
+   .question { font-size: 26px; color: #78350f; margin: 20px 0 30px 0; }
+   .reponses button {
+      display: block; width: 100%; margin: 12px 0; padding: 16px;
+      font-size: 18px; border: 2px solid #fef3c7; border-radius: 12px;
+      background: white; cursor: pointer; transition: 0.2s;
+    }
+   .reponses button:hover { background: #fffbeb; border-color: #f59e0b; }
+   .bonne { background: #4ade80!important; color: white; border-color: #4ade80!important; }
+   .mauvaise { background: #f87171!important; color: white; border-color: #f87171!important; }
+   .suivant { background: #22c55e; color: white; border: none; padding: 15px 40px; font-size: 20px; border-radius: 12px; margin-top: 20px; display: none; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🇨🇮 Karlyne Duo - Classe de 2ndA</h1>
+    <div class="score">Points: <span id="points">0</span> ✨</div>
+    <div class="barre"><div class="progres" id="progres"></div></div>
+  </header>
+
+  <div class="carte">
+    <div class="matiere" id="matiere"></div>
+    <div class="question" id="question"></div>
+    <div class="reponses" id="reponses"></div>
+    <button class="suivant" id="suivant" onclick="questionSuivante()">Suivant →</button>
+  </div>
+
+<script>
+  let points = 0;
+  let qIndex = 0;
+
+  const questions = [
+    // FRANÇAIS
+    {matiere: "📚 Français", q: "Quelle figure de style: 'Cette fille est un soleil'?", rep: ["Comparaison", "Métaphore", "Personnification"], bonne: 1},
+    {matiere: "📚 Français", q: "Le contraire de 'Rapide' est?", rep: ["Lent", "Doux", "Grand"], bonne: 0},
+
+    // ANGLAIS
+    {matiere: "🗣️ Anglais", q: "Comment dit-on 'Bonjour' en anglais?", rep: ["Good night", "Good morning", "Good evening"], bonne: 1},
+    {matiere: "🗣️ Anglais", q: "Complète: I ___ 15 years old", rep: ["am", "is", "are"], bonne: 0},
+
+    // HISTOIRE
+    {matiere: "🌍 Histoire", q: "Quelle est la capitale politique de la Côte d'Ivoire?", rep: ["Abidjan", "Yamoussoukro", "San-Pédro"], bonne: 1},
+    {matiere: "🌍 Histoire", q: "En quelle année la CI a eu son indépendance?", rep: ["1958", "1960", "1965"], bonne: 1},
+
+    // MATHS
+    {matiere: "📐 Maths", q: "Combien fait 15 + 27?", rep: ["40", "42", "45"], bonne: 1},
+    {matiere: "📐 Maths", q: "Si x = 3, combien vaut 2x + 4?", rep: ["8", "10", "12"], bonne: 1},
+
+    // ALLEMAND AVEC TRADUCTION FR
+    {matiere: "🇩🇪 Allemand", q: "Comment dit-on 'Bonjour' en allemand?", rep: ["Guten Tag", "Hallo", "Tschüss"], bonne: 0},
+    {matiere: "🇩🇪 Allemand", q: "Traduis: 'Ich heiße Karlyne' ", rep: ["Je m'appelle Karlyne", "J'ai 15 ans", "Je suis ivoirienne"], bonne: 0},
+    {matiere: "🇩🇪 Allemand", q: "Comment dit-on 'Merci' en allemand?", rep: ["Bitte", "Danke", "Gerne"], bonne: 1},
+
+    // PC - INFORMATIQUE
+    {matiere: "💻 Informatique", q: "Que signifie 'URL'?", rep: ["Adresse d'un site web", "Un ordinateur", "Un logiciel"], bonne: 0},
+    {matiere: "💻 Informatique", q: "Quel est le raccourci pour Copier?", rep: ["Ctrl + C", "Ctrl + V", "Ctrl + X"], bonne: 0},
+  ];
+
+  function chargerQuestion() {
+    if(qIndex >= questions.length) {
+      document.querySelector('.carte').innerHTML = `<h2>Félicitations Karlyne! 🎉</h2><p>Score final: ${points}/${questions.length}</p><button onclick="location.reload()">Rejouer</button>`;
+      return;
+    }
+    let q = questions[qIndex];
+    document.getElementById('matiere').innerText = q.matiere;
+    document.getElementById('question').innerText = q.q;
+    document.getElementById('progres').style.width = (qIndex/questions.length)*100 + '%';
+
+    let html = '';
+    q.rep.forEach((r,i) => {
+      html += `<button onclick="verifier(${i}, ${q.bonne})">${r}</button>`;
+    });
+    document.getElementById('reponses').innerHTML = html;
+    document.getElementById('suivant').style.display = 'none';
+  }
+
+  function verifier(choix, bonne) {
+    let btns = document.querySelectorAll('.reponses button');
+    btns.forEach(b => b.disabled = true);
+
+    if(choix == bonne) {
+      btns[choix].classList.add('bonne');
+      points++;
+      document.getElementById('points').innerText = points;
+    } else {
+      btns[choix].classList.add('mauvaise');
+      btns[bonne].classList.add('bonne');
+    }
+    document.getElementById('suivant').style.display = 'inline-block';
+  }
+
+  function questionSuivante() {
+    qIndex++;
+    chargerQuestion();
+  }
+
+  chargerQuestion();
+</script>
+</body>
+</html>
